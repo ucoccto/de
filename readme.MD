@@ -123,3 +123,16 @@
                        JSON / GZIP
                        Partition
 ```
+- s3 저장 샘플링
+```
+S3
+└─ bronze/
+   ├─ access/
+   │   └─ year=2026/month=08/day=11/
+   │
+   ├─ event/
+   │   └─ year=2026/month=08/day=11/
+   │
+   └─ error/
+       └─ year=2026/month=08/day=11/
+```
