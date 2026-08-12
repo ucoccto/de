@@ -39,7 +39,13 @@ default_args = {
 with DAG(
   dag_id      = "01_basics_bash", # DAG간 구분하는 용도
   description = "DE 업무중 배치 파이프라인 구성중 데이터 프로세싱 오케스트레이션 담당 airlfow의 DAG 작성 기본형", # DAG 설명
-  default_args= default_args
+  default_args= default_args,     # 기본 인자값
+  schedule_interval = "@daily",   # 하루에 한번 00시 00분 00초, 문자열, cron 표현 (* * * *)
+  start_date  = datetime(2026,6,29), # 현재 기준 갭이 발생 -> 소급 처리 x (위 설정 처리 x)
+  catchup     = False,            # 과거에 대한 소급 처리 실행 방지
+  # 기본 설정에서 소급 x, 오늘 기준으로 8월 13일 00시 00분 00초에 작동
+  tags        = ['bash', 'basic'] # DAG 검색(특정)을 위해서 자유롭게 세팅
+
 ) as dag:  
   # 3. Operator 정의
 
