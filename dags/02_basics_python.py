@@ -25,12 +25,19 @@ def _extract_cb(**kwargs):
 
   logging.info("=== Extract 작업 ===")
   logging.info(f" ti = {ti}")
+  '''
+    ds = 2026-08-12         <- task 수행 시간
+    ds_nodash = 20260812    <- task 수행 시간 (- 제거됨)
+    run_id    = manual__2026-08-12T06:40:55.384119+00:00
+  '''
   logging.info(f" ds = {ds}")
   logging.info(f" ds_nodash = {ds_nodash}")
   logging.info(f" run_id    = {run_id}")
 
+  # 정보 전달 -> XCOM 게시판에 본 task가 글을 작성하는것
+  # XCOM을 통해서 특정 데이터를 push 하는 행위 -> 반환 행위 (return)
+  return f"ds = {ds} ds_nodash = {ds_nodash} run_id    = {run_id}"
 
-  pass
 def _transform_cb(**kwargs):
   pass
 
