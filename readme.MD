@@ -592,6 +592,6 @@ Serving
 CloudWatch
 Prometheus
 Grafana
-OpenSearch Dashboards
+OpenSearch Dashboards / 키바나의 aws 버전
 Airflow UI
 ```
