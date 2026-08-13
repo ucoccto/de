@@ -1,5 +1,6 @@
 '''
 - airflow 내부 정보 접근, 출력시 jinja 활용, 내부 정보 접근시 macro 활용
+- 콜백함수 내부 kwargs를 인자를 통해 접근, 기타 일반적인 상황 jinja를 이용하여 접근
 '''
 # 1. 모듈
 from airflow import DAG
@@ -14,6 +15,7 @@ KST = pendulum.timezone("Asia/Seoul")
 
 # 4-1. 콜백함수
 def _print(**kwargs):
+  logging.info(f'ds 출력 { kwargs["ds"] }')
   pass
 
 # 3. DAG
@@ -36,11 +38,12 @@ with DAG(
   # 4. 오퍼레이터를 이용하여 task를 정의
   t1 = BashOperator(
     task_id         = "jinja_used_task",
-    bash_command    = ""
+    bash_command    = "echo 'DAG의 t1 task 수행시간 {{ ds }}, {{ ti }}' "
   )
   t2 = BashOperator(
     task_id         = "jinja_macro_task",
-    bash_command    = ""
+    # macro를 통해서 준비된 함수 활용
+    bash_command    = "echo 'DAG의 t1 task일주일전 수행시간(임시) {{ macro.ds_add(ds, -7) }}, 램덤 {{ macro.random() }}' "
   )
   t3 = PythonOperator(
     task_id         = "jinja_python_task",
