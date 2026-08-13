@@ -12,8 +12,12 @@ import pendulum
 # 2. 전역변수
 KST = pendulum.timezone("Asia/Seoul")
 
+# 4-1. 콜백함수
+def _print(**kwargs):
+  pass
+
 # 3. DAG
-with DAG(
+with DAG( 
   dag_id      = "03_basics_context_jinja",
   description = "macro을 이용하여 context 접근, jinja를 통해 표현",
   default_args= {
@@ -29,6 +33,19 @@ with DAG(
   tags        = ['macro', 'context', 'jinja']
 ) as dag:
 
-  # 4. 오퍼레이터
+  # 4. 오퍼레이터를 이용하여 task를 정의
+  t1 = BashOperator(
+    task_id         = "jinja_used_task",
+    bash_command    = ""
+  )
+  t2 = BashOperator(
+    task_id         = "jinja_macro_task",
+    bash_command    = ""
+  )
+  t3 = PythonOperator(
+    task_id         = "jinja_python_task",
+    python_callable = _print
+  )
 
   # 5. 의존성(수행순서)
+  t1 >> t2 >> t3
