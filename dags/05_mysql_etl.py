@@ -28,6 +28,17 @@ KST = pendulum.timezone("Asia/Seoul")
 
 # 콜백함수
 def _extract(**kwargs):
+  '''
+    - 스마트팩토리에 설치된 오븐 센서에서 데이터가 발생했고, 데이터 레이크(s3)에 저장되어있다 가정
+    - s3에서 가져왔다 가정    
+  '''
+  # 더미 데이터 구성 = [ {}, {}, ... ]
+  data = [
+    {
+      
+    }
+    for i in range(10)
+  ]
   pass
 def _transform(**kwargs):
   pass
@@ -53,7 +64,7 @@ with DAG(
   task_create_table = SQLExecuteQueryOperator(
     task_id         = "create_table",
     # 접속 정보 설정 -> 대시보드 > admin > connection 구성한 값 설정 ->id값
-    conn_id         = "mysql_default"
+    conn_id         = "mysql_default",
     # 테이블이 없을때만 구성
     sql             = '''
       CREATE TABLE IF NOT EXISTS sensor_readings (
