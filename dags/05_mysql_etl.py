@@ -21,3 +21,16 @@ import json
 import random
 import pandas as pd
 import os
+
+# 실습 기본 구성 틀 작성
+# 콜백함수
+
+# DAG 정의
+
+  # task 정의 
+  task_create_table = 
+  task_extract      = 
+  task_transform    = 
+  task_load         = 
+
+  # 의존성
