@@ -25,6 +25,9 @@ import os
 # 실습 기본 구성 틀 작성
 # 2. 전역변수
 KST = pendulum.timezone("Asia/Seoul")
+# extract 한 데이터를 임시로 저장하는 위치
+DATA_PATH = "/opt/airflow/dags/data"
+os.makedirs(DATA_PATH, exist_ok=True)
 
 # 콜백함수
 def _extract(**kwargs):
@@ -42,7 +45,13 @@ def _extract(**kwargs):
     }
     for i in range(10)
   ]
-  logging.info( f'더미데이터 {data}'  )
+  # 데이터를 다음 task에 전달 -> 데이터 전달 or 데이터 저장(리눅스 경로상)후 path 전달
+  # 파일명 sensor_data_20260813.json : 20260813=>"ds_nodash" 활용
+  # /opt/airflow/dags/data/sensor_data_DAG수행일.json
+  file_full_path = f"{DATA_PATH}/sensor_data_{kwargs['ds_nodash']}.json"
+
+
+  logging.info( f'extract 한 데이터 {data}'  )
   pass
 def _transform(**kwargs):
   pass
