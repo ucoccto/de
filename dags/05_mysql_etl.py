@@ -83,7 +83,6 @@ def _transform(**kwargs):
   # 4. 반환, XCOM 전달, 개시
   return csv_file_path
 
-
 def _load(**kwargs):
   # 1. csv 경로 획득
   ti             = kwargs["ti"]
