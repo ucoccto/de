@@ -54,8 +54,16 @@ with DAG(
     task_id         = "create_table",
     # 접속 정보 설정 -> 대시보드 > admin > connection 구성한 값 설정 ->id값
     conn_id         = "mysql_default"
+    # 테이블이 없을때만 구성
     sql             = '''
-
+      CREATE TABLE IF NOT EXISTS sensor_readings (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          sensor_id VARCHAR(50),
+          timestamp DATETIME,
+          temperature_c FLOAT,
+          temperature_f FLOAT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
     '''
   )
   task_extract      = PythonOperator(
