@@ -23,14 +23,53 @@ import pandas as pd
 import os
 
 # 실습 기본 구성 틀 작성
+# 2. 전역변수
+KST = pendulum.timezone("Asia/Seoul")
+
 # 콜백함수
+def _extract(**kwargs):
+  pass
+def _transform(**kwargs):
+  pass
+def _load(**kwargs):
+  pass
 
 # DAG 정의
-
+with DAG( 
+  dag_id      = "05_mysql_etl",
+  description = "etl 수행하여 mysql에 온도 센서 데이터 적제",
+  default_args= {
+    "owner"           : "aic-de1-admin",    
+    "retries"         : 1,
+    "retry_delay"     : timedelta(minutes=1)
+  },
+  schedule_interval = "@daily",
+  start_date  = pendulum.datetime( 2026,6,29, tz=KST ),
+  catchup     = False,
+  tags        = ['etl', 'mysql']
+) as dag:
+  
   # task 정의 
-  task_create_table = 
-  task_extract      = 
-  task_transform    = 
-  task_load         = 
+  task_create_table = SQLExecuteQueryOperator(
+    task_id         = "create_table",
+    # 접속 정보 설정 -> 대시보드 > admin > connection 구성한 값 설정 ->id값
+    conn_id         = "mysql_default"
+    sql             = '''
+
+    '''
+  )
+  task_extract      = PythonOperator(
+    task_id         = "extract",
+    python_callable = _extract
+  )
+  task_transform    = PythonOperator(
+    task_id         = "transform",
+    python_callable = _transform
+  )
+  task_load         = PythonOperator(
+    task_id         = "load",
+    python_callable = _load
+  )
 
   # 의존성
+  task_create_table >> task_extract >> task_transform >> task_load
