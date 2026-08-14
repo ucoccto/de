@@ -30,6 +30,8 @@ import pendulum
 import random
 # API 호출용
 import requests
+# 고객 더미 ID 구성
+import uuid
 
 # 전역변수
 KST       = pendulum.timezone("Asia/Seoul")
@@ -38,6 +40,51 @@ API_URL   = 'http://ai-api-server:8000/predict'
 
 # 3-1. 콜백함수
 def _create_dummy_data(**kwargs):
+  '''
+    테이블 없으면 생성, 더미 데이터 생성 삽입
+  '''
+  hooks = MySqlHook(mysql_conn_id="mysql_default")
+  try:
+    with hooks.get_conn() as conn:      
+      with conn.cursor() as cursor:        
+        # 테이블 생성
+        cursor.execute('''
+          CREATE TABLE IF NOT EXISTS customers (
+            user_id VARCHAR(50) PRIMARY KEY,
+            income INT DEFAULT NULL,
+            loan_amt INT DEFAULT NULL,
+            credit_score INT DEFAULT NULL,
+            grade VARCHAR(10) DEFAULT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          )
+        ''')
+        # 고객 데이터 생성 -> 삽입
+        sql = '''
+          insert into customers
+          (user_id, income, loan_amt)
+          values
+          (%s, %s, %s)
+        '''
+        params = [
+          (
+            f'u-{str(uuid.uuid4().hex)}',  # user_id
+            random.randint(3000, 10000),   # income
+            random.randint(1000, 5000)     # loan_amt
+          )
+          for _ in range(50)
+        ]
+        cursor.executemany( sql, params )
+        conn.commit()
+        pass
+  except Exception as e:
+    # 예외처리 수행 => 오류로 확정하여 => 실패로 만들던가, 분기를 해야함 (명확하게 작업에 대한 확정)
+    logging.error(f'sql  에러 { e }')
+  else:
+    logging.info(f'데이터베이스 처리 정상')
+  finally:
+    logging.info(f'데이터베이스 작업 완료')
+  
+
   pass
 def _extract_user_data(**kwargs):
   pass
