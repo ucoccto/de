@@ -1,4 +1,6 @@
+# -------------------------------------------
 # s3 구성에서만 사용
+# -------------------------------------------
 locals {
   # s3 버킷명
   # 글로벌 기준 : 버킷 이름은 3~63자여야 하며 글로벌 네임스페이스 내에서 고유해야 합니다. 
@@ -10,7 +12,9 @@ locals {
   airflow_bucket_name = "${var.project_name}-s3-bk-${data.aws_caller_identity.current.account_id}"
 }
 
+# -------------------------------------------
 # 버킷 생성
+# -------------------------------------------
 resource "aws_s3_bucket" "airflow_data" {
   # 버킷명
   bucket = local.airflow_bucket_name
@@ -28,7 +32,9 @@ resource "aws_s3_bucket" "airflow_data" {
   )
 }
 
+# -------------------------------------------
 # S3 Object Ownership(객체 소유권)
+# -------------------------------------------
 resource "aws_s3_bucket_ownership_controls" "airflow_data" {
   bucket = local.airflow_bucket_name
 
@@ -39,5 +45,42 @@ resource "aws_s3_bucket_ownership_controls" "airflow_data" {
     # - 접근 제어 IAM Policy / Bucket Policy 중심으로 관리한다 
     #   -> ACL 방식 x, 계정 소유자(IAM) 권한으로 관리
     object_ownership = "BucketOwnerEnforced"
+  }
+}
+
+# -------------------------------------------
+# s3 public access block
+# airflow(외부 PC)=> iam access key (IAM 인증)=> aws s3 bucket 접근, 
+# s3는 private 으로 관리
+# -------------------------------------------
+resource "aws_s3_bucket_public_access_block" "airflow_data" {
+  # 대상
+  bucket = local.airflow_bucket_name
+
+  # 설정
+  # 새로운 public acl 설정 차단
+  block_public_acls = true
+  # 기존 public acl 있더라도 무시
+  ignore_public_acls = true
+  # public 접근 허용하는 bucket policy 생성 차단
+  block_public_policy = true
+  # 버킷이 public policy를 가지더라도 public 접근 제한
+  restrict_public_buckets = true
+}
+
+# -------------------------------------------
+# s3 encryption
+# 두 개의 개별 암호화 계층으로 객체를 보호
+# s3에 저장되는 object를 자동 암호화하도록 설정
+# -------------------------------------------
+resource "aws_s3_bucket_server_side_encryption_configuration" "airflow_data" {
+  bucket = local.airflow_bucket_name
+
+  rule {
+    apply_server_side_encryption_by_default {
+      # AES256 = SSE-S3
+      # S3 관리하는 암호화 키를 이용하여 객체를 암호화 한다
+      sse_algorithm = "AES256"
+    }
   }
 }
