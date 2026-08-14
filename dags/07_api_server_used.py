@@ -9,13 +9,13 @@
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )
 - 매일 고객이 가입, 업무, 등등 디비 내용이 갱신 (설정)
-- 다음날 00시 01분 00초에 고객 디비 가져와서(extract) -> 신용평가(api 서버 요청) -> 평가결과 획득 -> 고객정보 업데이트
+- 다음날 00시 01분 00초에 고객 디비 가져와서(extract) 신용평가(api 서버 요청) 평가결과 획득 고객정보 업데이트
   - 갱신 주기는 변경될 수 있다(회사별 상이)
 - 배치 데이터 프로세스 작업 - airflow
   - Task 정리 (PythonOperator)
     - t1 : mysql 사용, 테이블이 없으면 생성, 고객 데이터 더미 입력(매번 수행-해쉬(UUID)적용)
       - 원래 배치 작업에서는 필요 없는 작없임
-    - t2 : 고객 데이터 획득 (DB -> DAG의 TI) => XCOM 게시 df or dict
+    - t2 : 고객 데이터 획득 (DB DAG의 TI) => XCOM 게시 df or dict
     - t3 : XCOM 데이터 획득 => API 호출 => 서버 고객데이터 전송 => 신용평가 진행 => 응답 => XCOM 게시
     - t4 : XCOM 데이터 획득 => 신용평가 결과 => 고객 디비 업데이트
 '''
@@ -58,7 +58,7 @@ def _create_dummy_data(**kwargs):
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           )
         ''')
-        # 고객 데이터 생성 -> 삽입
+        # 고객 데이터 생성 삽입
         sql = '''
           insert into customers
           (user_id, income, loan_amt)
@@ -97,9 +97,25 @@ def _extract_user_data(**kwargs):
       - ..
   '''
   # 1. 훅 획득
-  # 2. 훅 -> pandas로 sql 결과를 바로 획득 하는 함수 활용 (커넥션, 커서 생략)
-  # 3. df -> [ dict, dict, ..] 변환 XCOM 개시
-  pass
+  hooks = MySqlHook(mysql_conn_id="mysql_default")
+  # 2. 훅 pandas로 sql 결과를 바로 획득 하는 함수 활용 (커넥션, 커서 생략), 신용점수 없는 고객만
+  df = hooks.get_pandas_df('''
+    select
+      user_id, income, loan_amt
+    from 
+      customers
+    where
+      credit_score is NULL
+    ;
+  ''')
+  # 3. 결과셋에 따른 처리
+  if df.empty:
+    logging.info("평가 대상 없음")
+    return []
+  else:
+    # df [ dict, dict, ..] 변환 XCOM 개시
+    logging.info(f"평가 대상 { df.shape[0] }명")
+    return df.to_dict(orient="records")    
 
 def _api_service_call(**kwargs):
   pass
