@@ -86,10 +86,24 @@ def _create_dummy_data(**kwargs):
   
 
   pass
+
 def _extract_user_data(**kwargs):
+  '''
+    - 신용평가 점수가 없는 고객들을 모두 가져와서 (임시 설정) XCOM으로 개시 ( [ dict, dict, ..] )
+    - sql을 수행하여 데이터 획득 과정
+      - RDS 엑세스
+      - AWS Athena/Glue를 통해 sql 수행하여 s3(브론즈데이터등)에서 직접 획득
+      - AWS Opensearch->s3를 통해서 검색 수행하여 직접 획득
+      - ..
+  '''
+  # 1. 훅 획득
+  # 2. 훅 -> pandas로 sql 결과를 바로 획득 하는 함수 활용 (커넥션, 커서 생략)
+  # 3. df -> [ dict, dict, ..] 변환 XCOM 개시
   pass
+
 def _api_service_call(**kwargs):
   pass
+
 def _load_user_credit(**kwargs):
   pass
 
