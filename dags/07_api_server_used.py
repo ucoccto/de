@@ -138,6 +138,27 @@ def _api_service_call(**kwargs):
     raise
 
 def _load_user_credit(**kwargs):
+  # 1. 결과값 획득
+  target_user_data = kwargs['ti'].xcom_pull( task_ids='task_api_service_data')
+  if not target_user_data:
+    logging.error("신용 평가 결과 없음")
+    raise ValueError("신용 평가 결과 없음")
+
+  # 2. 고객 정보 업데이트
+  hooks = MySqlHook(mysql_conn_id="mysql_default")
+  with hooks.get_conn() as conn:
+    with conn.cursor() as cursor:
+      # 업데이트 쿼리
+      sql = '''
+
+      '''
+      params = [
+        
+      ]
+      # 업데이트 수행
+      cursor.executemany( sql, params )
+      conn.commit()
+
   pass
 
 # 2. DAG
