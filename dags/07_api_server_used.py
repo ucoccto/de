@@ -61,10 +61,22 @@ with DAG(
   tags        = ['etl', 'api']
 ) as dag:
   # 3. Task
-  t1 = PythonOperator()
-  t2 = PythonOperator()
-  t3 = PythonOperator()
-  t4 = PythonOperator()
-  
+  t1 = PythonOperator(
+    task_id         = "task_create_dummy_data",
+    python_callable = _create_dummy_data
+  )
+  t2 = PythonOperator(
+    task_id         = "task_extract_data",
+    python_callable = _extract_user_data
+  )
+  t3 = PythonOperator(
+    task_id         = "task_api_service_data",
+    python_callable = _api_service_call
+  )
+  t4 = PythonOperator(
+    task_id         = "task_load_users_data",
+    python_callable = _load_user_credit
+  )
+
   # 4. 의존성
   t1 >> t2 >> t3 >> t4
