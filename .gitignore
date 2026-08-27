@@ -241,3 +241,25 @@ rendered-*.yaml
 # Python
 __pycache__/
 *.pyc
+
+
+# Terraform
+infra/.terraform/
+#infra/*.tfstate
+#infra/*.tfstate.*
+infra/.terraform.lock.hcl
+infra/terraform.tfvars
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Generated logs
+output/*.jsonl
+output/*.log
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/

@@ -11,7 +11,7 @@ locals {
   # 최종버킷명 : de-ai-25-infra-s3-bk-827913617635
   airflow_bucket_name = "${var.project_name}-s3-bk-${data.aws_caller_identity.current.account_id}"
   #airflow_bucket_name = "${var.project_name}-s3-bk-${data.aws_caller_identity.current.account_id}"
-  
+
 }
 
 # -------------------------------------------
@@ -34,8 +34,8 @@ resource "aws_s3_bucket" "airflow_data" {
   # )
   tags = {
     ManageBy = "Terraform"
-    Project = "de-ai-25-loggen"
-    Purpose = "로그 제너레이터"
+    Project  = "de-ai-25-loggen"
+    Purpose  = "로그 제너레이터"
   }
 }
 
