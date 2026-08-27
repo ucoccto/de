@@ -57,17 +57,21 @@ with DAG(
         # 접속 및 디비 정보
         aws_conn_id = AWS_CONN_ID,
         database    = DATABASE_NAME,
-        output_location = QUERY_RESULT_S3
+        output_location = QUERY_RESULT_S3,
+        # 워크그룹의 저장 위치가 더 우선순위가 됨
+        # workgroup   = "de-ai-25-loggen-analysis"     
     )
-    # # 4-2. 기존 CTAS S3 데이터 삭제
-    # t2_delete_gold_s3  = S3DeleteObjectsOperator(
-    #     task_id = "delete_gold_s3",
-    # )
+    # 4-2. 기존 CTAS S3 데이터 삭제
+    t2_delete_gold_s3  = S3DeleteObjectsOperator(
+        task_id = "delete_gold_s3",
+        bucket  = BUCKET_NAME,
+        prefix  = GOLD_PREFIX,
+        aws_conn_id = AWS_CONN_ID
+    )
     # # 4-3. CTAS 실행 (silver sql 수행 => 결과 => 테이블 구성 => 결과 데이터는 parquet 저장)
     # t3_create_gold_table_with_ctas = AthenaOperator(
     #     task_id = "create_gold_table_with_ctas",
     # )
 
     # 5. 의존성 구성 (수행 순서 >> )
-    t1_drop_gold_table
-    #t1_drop_gold_table  >> t2_delete_gold_s3 >> t3_create_gold_table_with_ctas
+    t1_drop_gold_table  >> t2_delete_gold_s3 #>> t3_create_gold_table_with_ctas
