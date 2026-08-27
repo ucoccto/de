@@ -7,71 +7,38 @@ resource "aws_glue_catalog_database" "silver" {
   }
 }
 resource "aws_glue_catalog_table" "silver" {
-  # 테이블명
   name = "silver_logs_tbl"
-  # 테이블의 원소속(데이터베이스) 설정
   database_name = aws_glue_catalog_database.silver.name
-  # 데이터는 glue 외부에 존재함 원데이터는 s3에 저장되어 있음 -> 데이터가 glue 외부에 있으므로
   table_type = "EXTERNAL_TABLE"
 
-  # 파라미터 지정
   parameters = {
-    # 실 데이터가 glue 외부에 존재함을 표시
     EXTERNAL = "TRUE"
-    # parquet의 압축 방식
     "parquet.compression" = "SNAPPY"
-    # 파티션 활성화 (s3://버킷/silver/year=2026/....), 파티션화 되어 저장되어 있음 (partition projection)
     "projection.enabled" = "true"
-    # 파티션 정보 -> year, month, day, hour -> 타입, 값 범위 지정
-    # year
     "projection.year.type"  = "integer"
     "projection.year.range" = "2026,2040" # 뒤에 2040는 설정값, 2026은 현재로 가정
-
-    # month
-    # 1 -> 01, 2 -> 02 => digits = 2
     "projection.month.type"   = "integer"
     "projection.month.range"  = "1,12"
     "projection.month.digits" = "2" # 2자리수로 맞춤
-
-    # day
     "projection.day.type"   = "integer"
     "projection.day.range"  = "1,31"
     "projection.day.digits" = "2" # 2자리수로 맞춤
-
-    # hour
     "projection.hour.type"   = "integer"
     "projection.hour.range"  = "0,23"
     "projection.hour.digits" = "2" # 2자리수로 맞춤
-
-    # 파티션 S3 경로 규칙
-    # sql : ~ where year = '2026' ...
-    # $${year} => ${year} 자체로 전달하기 위해서 앞에 $ 추가한 표현
     "storage.location.template" = "s3://${aws_s3_bucket.data.bucket}/silver/year=$${year}/month=$${month}/day=$${day}/hour=$${hour}"
   }
 
   # 실제 데이터가 어디에 존재, 어떤 파일 형식, 어떤 스키마를 가지는지 구성
   storage_descriptor {
-    # 실제 silver 상에 s3 root 경로
     location = "s3://${aws_s3_bucket.data.bucket}/silver/"
-
-    # s3 파일이 parquet 형식임을 알려주는
     input_format  = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
     output_format = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
-
-    # parquet 내부에서 SNAPPY 압축 활용
     compressed = true
-
-    # parquet 파일과 Glue/Athena등 테이블간 사이에서 데이터 구조 해석하는 역활
     ser_de_info {
-      # 식별을 위한 이름
       name = "silver-parquet"
-      # 데이터 해석을 위한 parquet ser_de
       serialization_library = "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
     }
-
-    # silver 공통 스키마 (도메인별 동일)
-    # { "schema_version":"1.0","record_type":"application_log","event_id":"a7a0a4e9-e71e-4028-b3eb-0f250bc2e713","trace_id":"2ffbd18b722f46dea9bfaf4ad6c59fce","run_id":"loggen-2684615959-10518","occurred_at":"2026-08-25T09:59:31.059+09:00","generated_at_utc":"2026-08-25T00:59:31.059+00:00","domain":"ecommerce","event_type":"product_view", ...}
-    # 컬럼 1개씩 세팅 => 자동으로 세팅 (glue crawler)
     columns {
       name = "schema_version"
       type = "string"
@@ -138,6 +105,7 @@ resource "aws_glue_catalog_table" "silver" {
       type = "struct<status_code:int,latency_ms:bigint,response_bytes:bigint>"
     }
 
+    # 모든 도메인의 데이터를 받을수 있도록 슈퍼셋 구성
     # data 중첩 스키마 => 도메인별로 상이=> 모든 도메인의 키를 등록
     # "data":{"user_id":"usr_163397","session_id":"b297a82569a645bc841c","product_id":"prd_83053","category":"home","quantity":1,"unit_price":274300,"currency":"KRW","campaign":"retargeting"}
     columns {
