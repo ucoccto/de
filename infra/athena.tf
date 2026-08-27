@@ -6,7 +6,7 @@ locals {
 # workgroup (작업 그룹 생성)
 resource "aws_athena_workgroup" "analysis" {
   # 작업그룹 이름
-  name  = "${var.project_name}-analysis"
+  name = "${var.project_name}-analysis"
   # 작업그룹 활성화
   state = "ENABLED"
   # 작업그룹의 구성 설정
@@ -17,6 +17,6 @@ resource "aws_athena_workgroup" "analysis" {
     }
   }
   tags = {
-    Processing = "Batch"    
+    Processing = "Batch"
   }
 }
