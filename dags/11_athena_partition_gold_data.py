@@ -97,7 +97,12 @@ with DAG(
     t2_drop_partition = AthenaOperator(
         task_id = "drop_partition",
         query = f'''
-
+            ALTER TABLE {GOLD_TABLE_NAME}
+            DROP if exists Partition (
+              year  = '{TARGET_YEAR}',
+              month = '{TARGET_MONTH}',
+              day   = '{TARGET_DAY}'  
+            )
         ''',
         aws_conn_id = AWS_CONN_ID,
         database    = DATABASE_NAME,
