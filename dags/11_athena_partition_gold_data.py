@@ -94,6 +94,17 @@ with DAG(
 
 
     # 4-2. 동일날짜에 대해서 중복적 실행하는 컨셉이라면 -> 허용(1일 1회인데 허용), 하루에 여러번 수행 컨셉(누적)
+    t2_drop_partition = AthenaOperator(
+        task_id = "drop_partition",
+        query = f'''
+
+        ''',
+        aws_conn_id = AWS_CONN_ID,
+        database    = DATABASE_NAME,
+        output_location = QUERY_RESULT_S3,
+        # workgroup   = "de-ai-25-loggen-analysis"
+    )
+    
     # 4-3. 누적 교체하는 관점 -> 데이터 삭제 처리 필요
     # 4-4. 당일 전체 데이터에 대한(파티션 수행) 데이터 insert 처리
     
@@ -169,4 +180,4 @@ with DAG(
     # )
 
     # 5. 의존성 구성 (수행 순서 >> )
-    t1_create_gold_table
+    t1_create_gold_table >> t2_drop_partition
