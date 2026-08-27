@@ -54,6 +54,45 @@ with DAG(
 
     # 4. task 정의 (오퍼레이터 사용)
     # 4-1. Gold 테이블 생성 (최초 실행시 1회 생성 -> 이후 테이블 유지)
+    #      실습 : gold_daily_report_tbl, 컬럼 (desc gold_daily_report_ctas_tbl; <- 내용으로 배치)
+    t1_create_gold_table = AthenaOperator(
+        task_id = "create_gold_table",
+        # sql
+        query = f'''
+            CREATE EXTERNAL TABLE IF NOT EXISTS {GOLD_TABLE_NAME} (
+                report_date         	date,
+                domain              	string,
+                event_type          	string,
+                service_name        	string,
+                total_count         	bigint,
+                response_count      	bigint,
+                success_count       	bigint,
+                error_count         	bigint,
+                error_rate_pct      	double,
+                avg_latency_ms      	double,
+                min_latency_ms      	bigint,
+                p95_latency_ms      	bigint,
+                max_latency_ms      	bigint,
+                total_request_bytes 	bigint,
+                total_response_bytes	bigint   
+            )
+            partition by (
+                year    STRING,
+                month   STRING,
+                day     STRING
+            )
+            STORED AS PARQUET
+            LOCATION '{GOLD_LOCATION}'
+        ''',
+        # 접속 및 디비 정보
+        aws_conn_id = AWS_CONN_ID,
+        database    = DATABASE_NAME,
+        output_location = QUERY_RESULT_S3,
+        # 워크그룹의 저장 위치가 더 우선순위가 됨
+        # workgroup   = "de-ai-25-loggen-analysis"
+    )
+
+
     # 4-2. 동일날짜에 대해서 중복적 실행하는 컨셉이라면 -> 허용(1일 1회인데 허용), 하루에 여러번 수행 컨셉(누적)
     # 4-3. 누적 교체하는 관점 -> 데이터 삭제 처리 필요
     # 4-4. 당일 전체 데이터에 대한(파티션 수행) 데이터 insert 처리
