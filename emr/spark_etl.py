@@ -51,9 +51,13 @@ def clean_processing():
 
     # 4-3. Transform 정제 -> 필터 => 노이즈 제거(결측, 오류값등이 존재하는 데이터 제외)
     clean_df = ( raw_df
-      .filter( F.col('user_id')   )
-      .filter( F.col('price')     )
-      .filter( F.col('timestamp') )
+      .filter( F.col('user_id').isNotNull()  ) # 결측치 제거 => 아이디가 있는 데이터만 포함
+      .filter( F.col('price') > 0            ) # 0보다 크면 모두 포함
+      
+      
+      .withColumn('event_time', F.to_timestamp( F.col('timestamp'), "yyyy-MM-dd HH:mm:ss")) #'event_time' 파생 컬럼 생성
+      .filter( F.col('event_time').isNotNull() ) # 타입변환->노이즈 결측됨->결측제외->데이터 획득
+
       .fillna( {"event_type":"unknown" } ) # 결측치를 특정값 대체, 매칭으로 처리
       .dropDuplicates(["event_id"])        # "event_id"가 중복되게 전달될수 있다(실제, 여기 코드에서는 대상 x)
     )
