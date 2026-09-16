@@ -99,7 +99,7 @@ with DAG(
     "retries"         : 1,
     "retry_delay"     : timedelta(minutes=1)
   },
-  schedule_interval = "daily",
+  schedule_interval = "@daily",
   start_date  = pendulum.datetime( 2026,6,29, tz=pendulum.timezone("Asia/Seoul") ),
   catchup     = False,
   tags        = ['aws', 'spark', 'emr']
