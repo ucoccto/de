@@ -108,7 +108,7 @@ with DAG(
     create_cluster_task     = EmrCreateJobFlowOperator( # EMR 클러스터 생성 (스파크 구동하기 위한 인프라 구성)
         task_id = "create_cluster",
         # 인프라 구성 dict로 표현 == 테라폼의 resource "aws_emr_cluster" {}
-        job_flow_overrides = JOB_FIOW_OVERRIDES,
+        job_flow_overrides = JOB_FLOW_OVERRIDES,
         # aws 연결 정보
         aws_conn_id = "aws_default"
         # 인프라 구성후 클러스터를 참조할있는 리소스 id를 자동 반환
