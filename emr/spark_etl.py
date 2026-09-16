@@ -63,8 +63,12 @@ def clean_processing():
     )
 
     # 4-4. Transform 파생변수 -> 처리시간기록
+    final_df = clean_df.withColumn( 'processed_at', F.current_timestamp() )
+    # timestamp 컬럼을 제외하려고 한다면  select() 활용
+    print(f'데이터 전처리후 개수 {final_df.count()}')
 
     # 4-5. Load parquet로 저장
+    final_df.write.mode('overwrite').parquet(OUTPUT_PATH) # S3 저장
 
     # 4-6. 스파크 세션 종료
     spark.stop()
