@@ -41,8 +41,8 @@ JOB_FLOW_OVERRIDES = {
                 "Name": "Master node",
                 # 스팟 : 비용 저렴, EC2 용량대비 할인 가격을 사용. 단, 시스템에 의해 중단 가능성 존재함
                 # Master는 안정성이 중요해서
-                "Market": "SPOT",
-                #"Market": "ON_DEMAND",  # <- 이 구성이 더 나음
+                #"Market": "SPOT",
+                "Market": "ON_DEMAND",  # <- 이 구성이 더 나음
                 "InstanceRole": "MASTER",
                 "InstanceType": "m5.xlarge",
                 "InstanceCount": 1,
@@ -64,7 +64,7 @@ JOB_FLOW_OVERRIDES = {
     },
     # 최소 권한 부여했다
     "JobFlowRole": "EMR_EC2_DefaultRole", # EC2 인스턴스가 사용하는 IAM ROLE
-    "ServiceRole": "EMR_DefaultRole",     # EMR 서비스에 대한 기본 IAM ROLE
+    "ServiceRole": "EMR_DefaultRole_de25",     # EMR 서비스에 대한 기본 IAM ROLE
     # EMR 로그 저장 위치 지2정
     "LogUri": EMR_LOG_URI,
     # 클러스터의 가시성 설정
