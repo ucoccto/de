@@ -27,8 +27,37 @@ def clean_processing():
     )
 
     # 4-2. Extract 데이터 추출, 스키마 준비, JSON경로(브론즈경로) => df
+    '''
+    {
+     "event_id": "7a565719-41e9-4b36-9ce7-c4bfde531f8c", "user_id": "user_442", 
+     "event_type": "purchase", "product_id": 1287, 
+     "price": 35215, "timestamp": "2026-09-16 09:15:31", "os": "Windows"
+    }
+    '''
+    # 4-2-1. 스키마 정의
+    schema = StructType([
+        StructField('event_id',     StringType(),  True),
+        StructField('user_id',      StringType(),  True),
+        StructField('event_type',   StringType(),  True),
+        StructField('product_id',   IntegerType(), True),
+        StructField('price',        IntegerType(), True),
+        StructField('timestamp',    StringType(),  True),
+        StructField('os',           StringType(),  True)
+    ])
+    # 4-2-2. df 구성
+    raw_df = spark.read.schema(schema).json(INPUT_PATH) # 지연모드이므로 데이터 로드 x
+    # 원본 데이터 확인
+    print(f'원본 데이터 개수 {raw_df.count()}')
 
-    # 4-3. Transform 정제 -> 필터    
+    # 4-3. Transform 정제 -> 필터 => 노이즈 제거(결측, 오류값등이 존재하는 데이터 제외)
+    clean_df = ( raw_df
+      .filter( F.col('user_id')   )
+      .filter( F.col('price')     )
+      .filter( F.col('timestamp') )
+      .fillna( {"event_type":"unknown" } ) # 결측치를 특정값 대체, 매칭으로 처리
+      .dropDuplicates(["event_id"])        # "event_id"가 중복되게 전달될수 있다(실제, 여기 코드에서는 대상 x)
+    )
+
     # 4-4. Transform 파생변수 -> 처리시간기록
 
     # 4-5. Load parquet로 저장
